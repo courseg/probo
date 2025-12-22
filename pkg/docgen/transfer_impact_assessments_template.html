@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Records of Transfer Impact Assessments Export</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2.5cm;
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: Arial, sans-serif;
+                font-size: 9pt;
+                color: #666;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 9pt;
+            line-height: 1.5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background: white;
+        }
+
+        /* Cover page */
+        .cover-page {
+            page-break-after: always;
+        }
+
+        .company-header {
+            margin-bottom: 30px;
+            page-break-after: avoid;
+        }
+
+        .company-logo {
+            max-height: 50px;
+            max-width: 250px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .company-name {
+            font-size: 16pt;
+            color: #1a1a1a;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .export-title {
+            font-size: 22pt;
+            font-weight: normal;
+            color: #1a1a1a;
+            margin: 0 0 25px 0;
+        }
+
+        .export-date {
+            font-size: 10pt;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .purpose-section {
+            margin: 30px 0;
+            page-break-after: avoid;
+        }
+
+        .purpose-title {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin: 30px 0 15px 0;
+            page-break-after: avoid;
+        }
+
+        .purpose-text {
+            font-size: 10pt;
+            color: #333;
+            line-height: 1.5;
+            text-align: justify;
+        }
+
+        .toc-title {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin: 30px 0 15px 0;
+            page-break-after: avoid;
+        }
+
+        .toc-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 10pt;
+            page-break-inside: avoid;
+            table-layout: auto;
+            word-wrap: break-word;
+        }
+
+        .toc-table th {
+            background: #f5f5f5;
+            font-weight: bold;
+            color: #333;
+            padding: 6px 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+            vertical-align: top;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .toc-table td {
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .toc-table tr {
+            page-break-inside: avoid;
+        }
+
+        /* Assessment page */
+        .assessment-page {
+            page-break-before: always;
+            page-break-after: always;
+        }
+
+        .assessment-page:last-child {
+            page-break-after: auto;
+        }
+
+        .assessment-title {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin: 30px 0 15px 0;
+            padding-bottom: 4px;
+            border-bottom: 2px solid #333;
+            page-break-after: avoid;
+            page-break-inside: avoid;
+        }
+
+        .assessment-section {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+
+        .assessment-section-title {
+            font-size: 10pt;
+            font-weight: bold;
+            color: #333;
+            margin: 0 0 14px 0;
+            padding-bottom: 6px;
+            border-bottom: 0.5px solid #ccc;
+        }
+
+        .assessment-field {
+            margin-bottom: 16px;
+            page-break-inside: avoid;
+        }
+
+        .assessment-field-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 9pt;
+        }
+
+        .assessment-field-value {
+            color: #000;
+            font-size: 9pt;
+            line-height: 1.5;
+        }
+
+        .empty-value {
+            color: #999;
+            font-style: italic;
+        }
+
+        /* Annex page */
+        .annex-page {
+            page-break-before: always;
+        }
+
+        .annex-title {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin: 0 0 20px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #333;
+        }
+
+        .annex-section {
+            margin-bottom: 20px;
+        }
+
+        .annex-section-title {
+            font-size: 12pt;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin: 15px 0 10px 0;
+        }
+
+        .annex-enum-list {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .annex-enum-item {
+            margin-bottom: 8px;
+            font-size: 10pt;
+            line-height: 1.5;
+        }
+
+        .annex-enum-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .annex-enum-description {
+            color: #000;
+            margin-left: 5px;
+        }
+
+        .annex-note {
+            font-size: 10pt;
+            color: #666;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cover page with table of contents -->
+    <div class="cover-page">
+        <div class="company-header">
+            {{- if .CompanyHorizontalLogoBase64}}
+            {{imgTag .CompanyHorizontalLogoBase64 "Company Logo" "company-logo"}}
+            {{- else}}
+            <div class="company-name">{{.CompanyName}}</div>
+            {{- end}}
+        </div>
+
+        <h1 class="export-title">Records of Transfer Impact Assessments</h1>
+        <div class="export-date">Exported on {{.ExportDate.Format "January 2, 2006"}}</div>
+
+        <div class="purpose-section">
+            <div class="purpose-title">Purpose</div>
+            <div class="purpose-text">
+                This document contains Transfer Impact Assessments (TIAs) conducted for processing activities involving
+                international transfers of personal data to countries outside the European Economic Area (EEA). TIAs
+                evaluate the legal mechanisms used for transfers, assess risks related to local laws in destination
+                countries, and document supplementary measures implemented to ensure an adequate level of data protection.
+                This export is intended for compliance documentation, regulatory reporting, and internal governance purposes.
+            </div>
+        </div>
+
+        <h2 class="toc-title">Table of Contents</h2>
+        <table class="toc-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Page</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{- $total := len .Assessments}}
+                {{- range $index, $assessment := .Assessments}}
+                <tr>
+                    <td>{{$assessment.ProcessingActivityName}}</td>
+                    <td>{{calculateAssessmentPage $index $total}}</td>
+                </tr>
+                {{- end}}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Individual assessment pages -->
+    {{- range .Assessments}}
+    <div class="assessment-page">
+        <h1 class="assessment-title">{{.ProcessingActivityName}}</h1>
+
+        <div class="assessment-section">
+            <div class="assessment-section-title">Transfer Details</div>
+            <div class="assessment-field">
+                <div class="assessment-field-label">Data Subjects</div>
+                <div class="assessment-field-value">{{if .DataSubjects}}{{.DataSubjects}}{{else}}<span class="empty-value">Not specified</span>{{end}}</div>
+            </div>
+            <div class="assessment-field">
+                <div class="assessment-field-label">Transfer</div>
+                <div class="assessment-field-value">{{if .Transfer}}{{.Transfer}}{{else}}<span class="empty-value">Not specified</span>{{end}}</div>
+            </div>
+        </div>
+
+        <div class="assessment-section">
+            <div class="assessment-section-title">Legal Framework</div>
+            <div class="assessment-field">
+                <div class="assessment-field-label">Legal Mechanism</div>
+                <div class="assessment-field-value">{{if .LegalMechanism}}{{.LegalMechanism}}{{else}}<span class="empty-value">Not specified</span>{{end}}</div>
+            </div>
+        </div>
+
+        <div class="assessment-section">
+            <div class="assessment-section-title">Risk Assessment</div>
+            <div class="assessment-field">
+                <div class="assessment-field-label">Local Law Risk</div>
+                <div class="assessment-field-value">{{if .LocalLawRisk}}{{.LocalLawRisk}}{{else}}<span class="empty-value">Not specified</span>{{end}}</div>
+            </div>
+        </div>
+
+        <div class="assessment-section">
+            <div class="assessment-section-title">Safeguards</div>
+            <div class="assessment-field">
+                <div class="assessment-field-label">Supplementary Measures</div>
+                <div class="assessment-field-value">{{if .SupplementaryMeasures}}{{.SupplementaryMeasures}}{{else}}<span class="empty-value">Not specified</span>{{end}}</div>
+            </div>
+        </div>
+    </div>
+    {{- end}}
+</body>
+</html>
