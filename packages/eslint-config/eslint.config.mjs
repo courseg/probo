@@ -23,19 +23,29 @@ export function createConfig({
         ...tseslint.configs.stylisticTypeChecked,
         {
             files,
-            languageOptions: {
-                ecmaVersion: 2020,
-                sourceType: "module",
-                globals: {
+            languageOptions: (() => {
+                const mergedGlobals = {
                     ...globals.node,
                     ...globals.es2021,
-                },
-                parserOptions: {
+                    ...(languageOptions.globals || {}),
+                };
+                const mergedParserOptions = {
                     project,
                     ...(tsconfigRootDir && { tsconfigRootDir }),
-                },
-                ...languageOptions,
-            },
+                    ...(languageOptions.parserOptions || {}),
+                };
+                const otherLanguageOptions = Object.fromEntries(
+                    Object.entries(languageOptions).filter(([key]) => key !== "globals" && key !== "parserOptions"),
+                );
+
+                return {
+                    ecmaVersion: 2020,
+                    sourceType: "module",
+                    globals: mergedGlobals,
+                    parserOptions: mergedParserOptions,
+                    ...otherLanguageOptions,
+                };
+            })(),
             plugins: {
                 "@stylistic": stylistic,
                 prettier,
