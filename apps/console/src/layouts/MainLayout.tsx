@@ -217,6 +217,13 @@ function MainLayoutContent({
               to={`${prefix}/continual-improvements`}
             />
           )}
+          {isAuthorized("Organization", "listRightsRequests") && (
+            <SidebarItem
+              label={__("Rights Requests")}
+              icon={IconLock}
+              to={`${prefix}/rights-requests`}
+            />
+          )}
           {isAuthorized("Organization", "listProcessingActivities") && (
             <SidebarItem
               label={__("Processing Activities")}
@@ -441,7 +448,7 @@ function OrganizationSelector({
             {isLoading ? __("Loading...") : currentOrganization?.name || ""}
           </Button>
         }
-      >  
+      >
         <div className="px-3 py-2">
           <Input
             icon={IconMagnifyingGlass}
@@ -449,7 +456,7 @@ function OrganizationSelector({
             value={search}
             onValueChange={setSearch}
             onKeyDown={(e) => {
-                e.stopPropagation(); 
+                e.stopPropagation();
             }}
             autoFocus
           />
