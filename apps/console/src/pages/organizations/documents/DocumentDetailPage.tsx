@@ -4,9 +4,8 @@ import {
   loadQuery,
   useFragment,
   usePreloadedQuery,
-  useLazyLoadQuery,
 } from "react-relay";
-import type { DocumentGraphNodeQuery } from "/hooks/graph/__generated__/DocumentGraphNodeQuery.graphql";
+import type { DocumentGraphNodeQuery } from "/__generated__/core/DocumentGraphNodeQuery.graphql";
 import {
   documentNodeQuery,
   useDeleteDocumentMutation,
@@ -16,10 +15,9 @@ import { usePageTitle } from "@probo/hooks";
 import type {
   DocumentDetailPageDocumentFragment$data,
   DocumentDetailPageDocumentFragment$key,
-} from "./__generated__/DocumentDetailPageDocumentFragment.graphql";
-import type { DocumentDetailPageExportPDFMutation } from "./__generated__/DocumentDetailPageExportPDFMutation.graphql";
-import type { DocumentDetailPageUpdateMutation } from "./__generated__/DocumentDetailPageUpdateMutation.graphql";
-import type { DocumentDetailPageUserEmailQuery } from "./__generated__/DocumentDetailPageUserEmailQuery.graphql";
+} from "/__generated__/core/DocumentDetailPageDocumentFragment.graphql";
+import type { DocumentDetailPageExportPDFMutation } from "/__generated__/core/DocumentDetailPageExportPDFMutation.graphql";
+import type { DocumentDetailPageUpdateMutation } from "/__generated__/core/DocumentDetailPageUpdateMutation.graphql";
 import { useTranslate } from "@probo/i18n";
 import {
   ActionDropdown,
@@ -178,22 +176,20 @@ const documentUpdateSchema = z.object({
   classification: z.enum(documentClassifications),
 });
 
-const UserEmailQuery = graphql`
-  query DocumentDetailPageUserEmailQuery {
-    viewer {
-      user {
-        email
-      }
-    }
-  }
-`;
+// const UserEmailQuery = graphql`
+//   query DocumentDetailPageUserEmailQuery {
+//     viewer {
+//       email
+//     }
+//   }
+// `;
 
 export default function DocumentDetailPage(props: Props) {
   const { versionId } = useParams<{ versionId?: string }>();
   const node = usePreloadedQuery(documentNodeQuery, props.queryRef).node;
   const document = useFragment<DocumentDetailPageDocumentFragment$key>(
     documentFragment,
-    node
+    node,
   );
   const { __ } = useTranslate();
   const organizationId = useOrganizationId();
@@ -216,7 +212,7 @@ export default function DocumentDetailPage(props: Props) {
     {
       successMessage: __("Document published successfully."),
       errorMessage: __("Failed to publish document"),
-    }
+    },
   );
   const [deleteDocument, isDeleting] = useDeleteDocumentMutation();
   const [deleteDraftDocumentVersion, isDeletingDraft] =
@@ -227,18 +223,22 @@ export default function DocumentDetailPage(props: Props) {
       {
         successMessage: __("PDF download started."),
         errorMessage: __("Failed to generate PDF"),
-      }
+      },
     );
 
-  const userEmailData = useLazyLoadQuery<DocumentDetailPageUserEmailQuery>(UserEmailQuery, {});
-  const defaultEmail = userEmailData.viewer.user.email;
-  const [updateDocument, isUpdatingDocument] = useMutationWithToasts<DocumentDetailPageUpdateMutation>(
-    updateDocumentMutation,
-    {
-      successMessage: __("Document updated successfully."),
-      errorMessage: __("Failed to update document"),
-    }
-  );
+  // const userEmailData = useLazyLoadQuery<DocumentDetailPageUserEmailQuery>(
+  //   UserEmailQuery,
+  //   {}
+  // );
+  // const defaultEmail = userEmailData.viewer.user.email;
+  const [updateDocument, isUpdatingDocument] =
+    useMutationWithToasts<DocumentDetailPageUpdateMutation>(
+      updateDocumentMutation,
+      {
+        successMessage: __("Document updated successfully."),
+        errorMessage: __("Failed to update document"),
+      },
+    );
   const versionConnectionId = document.versions.__id;
 
   const { register, control, handleSubmit, reset } = useFormWithSchema(
@@ -250,7 +250,7 @@ export default function DocumentDetailPage(props: Props) {
         documentType: document.documentType,
         classification: currentVersion.classification,
       },
-    }
+    },
   );
 
   usePageTitle(document.title);
@@ -299,7 +299,7 @@ export default function DocumentDetailPage(props: Props) {
           props.queryRef.environment,
           documentNodeQuery,
           props.queryRef.variables,
-          { fetchPolicy: "network-only" }
+          { fetchPolicy: "network-only" },
         );
       },
     });
@@ -321,7 +321,7 @@ export default function DocumentDetailPage(props: Props) {
           props.queryRef.environment,
           documentNodeQuery,
           props.queryRef.variables,
-          { fetchPolicy: "network-only" }
+          { fetchPolicy: "network-only" },
         );
       },
     });
@@ -355,11 +355,11 @@ export default function DocumentDetailPage(props: Props) {
       {
         message: sprintf(
           __(
-            'This will permanently delete the document "%s". This action cannot be undone.'
+            'This will permanently delete the document "%s". This action cannot be undone.',
           ),
-          document.title
+          document.title,
         ),
-      }
+      },
     );
   };
 
@@ -377,7 +377,7 @@ export default function DocumentDetailPage(props: Props) {
                 props.queryRef.environment,
                 documentNodeQuery,
                 props.queryRef.variables,
-                { fetchPolicy: "network-only" }
+                { fetchPolicy: "network-only" },
               );
 
               resolve();
@@ -388,12 +388,12 @@ export default function DocumentDetailPage(props: Props) {
       {
         message: sprintf(
           __(
-            'This will permanently delete the draft version %s of "%s". This action cannot be undone.'
+            'This will permanently delete the draft version %s of "%s". This action cannot be undone.',
           ),
           currentVersion.version,
-          document.title
+          document.title,
         ),
-      }
+      },
     );
   };
 
@@ -443,7 +443,7 @@ export default function DocumentDetailPage(props: Props) {
         ref={pdfDownloadDialogRef}
         onDownload={handleDownloadPdf}
         isLoading={isExporting}
-        defaultEmail={defaultEmail}
+        // defaultEmail={defaultEmail}
       >
         {null}
       </PdfDownloadDialog>
@@ -499,15 +499,17 @@ export default function DocumentDetailPage(props: Props) {
                   {isDraft ? __("Edit draft document") : __("Create new draft")}
                 </DropdownItem>
               )}
-              {isDraft && versions.length > 1 && isAuthorized("Document", "deleteDraftDocumentVersion") && (
-                <DropdownItem
-                  onClick={handleDeleteDraft}
-                  icon={IconTrashCan}
-                  disabled={isDeletingDraft}
-                >
-                  {__("Delete draft document")}
-                </DropdownItem>
-              )}
+              {isDraft &&
+                versions.length > 1 &&
+                isAuthorized("Document", "deleteDraftDocumentVersion") && (
+                  <DropdownItem
+                    onClick={handleDeleteDraft}
+                    icon={IconTrashCan}
+                    disabled={isDeletingDraft}
+                  >
+                    {__("Delete draft document")}
+                  </DropdownItem>
+                )}
               <DropdownItem
                 onClick={() => pdfDownloadDialogRef.current?.open()}
                 icon={IconArrowDown}
@@ -616,7 +618,10 @@ export default function DocumentDetailPage(props: Props) {
               />
             </EditablePropertyContent>
           ) : (
-            <ReadOnlyPropertyContent onEdit={() => setIsEditingOwner(true)} canEdit={isAuthorized("Document", "updateDocument")}>
+            <ReadOnlyPropertyContent
+              onEdit={() => setIsEditingOwner(true)}
+              canEdit={isAuthorized("Document", "updateDocument")}
+            >
               <Badge variant="highlight" size="md" className="gap-2">
                 <Avatar name={currentVersion.owner?.fullName ?? ""} />
                 {currentVersion.owner?.fullName}
@@ -643,7 +648,10 @@ export default function DocumentDetailPage(props: Props) {
               </ControlledField>
             </EditablePropertyContent>
           ) : (
-            <ReadOnlyPropertyContent onEdit={() => setIsEditingType(true)} canEdit={isAuthorized("Document", "updateDocument")}>
+            <ReadOnlyPropertyContent
+              onEdit={() => setIsEditingType(true)}
+              canEdit={isAuthorized("Document", "updateDocument")}
+            >
               <div className="text-sm text-txt-secondary">
                 {getDocumentTypeLabel(__, document.documentType)}
               </div>
@@ -674,7 +682,10 @@ export default function DocumentDetailPage(props: Props) {
               canEdit={isAuthorized("Document", "updateDocument")}
             >
               <div className="text-sm text-txt-secondary">
-                {getDocumentClassificationLabel(__, currentVersion.classification)}
+                {getDocumentClassificationLabel(
+                  __,
+                  currentVersion.classification,
+                )}
               </div>
             </ReadOnlyPropertyContent>
           )}
@@ -749,7 +760,9 @@ function ReadOnlyPropertyContent({
   return (
     <div className="flex items-center justify-between gap-3">
       {children}
-      {canEdit && <Button variant="quaternary" icon={IconPencil} onClick={onEdit} />}
+      {canEdit && (
+        <Button variant="quaternary" icon={IconPencil} onClick={onEdit} />
+      )}
     </div>
   );
 }
@@ -780,7 +793,7 @@ function VersionItem({
         <div
           className={clsx(
             "flex-shrink-0 flex items-center justify-center size-10",
-            active && "bg-active rounded"
+            active && "bg-active rounded",
           )}
         >
           <div className="text-base text-txt-primary whitespace-nowrap font-bold text-center">

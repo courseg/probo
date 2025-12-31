@@ -26,12 +26,11 @@ import {
   useFragment,
   usePaginationFragment,
   usePreloadedQuery,
-  useLazyLoadQuery,
   type PreloadedQuery,
 } from "react-relay";
 import { use, useRef } from "react";
 import { graphql } from "relay-runtime";
-import type { DocumentGraphListQuery } from "/hooks/graph/__generated__/DocumentGraphListQuery.graphql";
+import type { DocumentGraphListQuery } from "/__generated__/core/DocumentGraphListQuery.graphql";
 import {
   documentsQuery,
   useDeleteDocumentMutation,
@@ -39,7 +38,7 @@ import {
   useBulkDeleteDocumentsMutation,
   useBulkExportDocumentsMutation,
 } from "/hooks/graph/DocumentGraph";
-import type { DocumentsPageListFragment$key } from "./__generated__/DocumentsPageListFragment.graphql";
+import type { DocumentsPageListFragment$key } from "/__generated__/core/DocumentsPageListFragment.graphql";
 import { useList, usePageTitle } from "@probo/hooks";
 import {
   sprintf,
@@ -48,7 +47,7 @@ import {
   formatDate,
 } from "@probo/helpers";
 import { CreateDocumentDialog } from "./dialogs/CreateDocumentDialog";
-import type { DocumentsPageRowFragment$key } from "./__generated__/DocumentsPageRowFragment.graphql";
+import type { DocumentsPageRowFragment$key } from "/__generated__/core/DocumentsPageRowFragment.graphql";
 import { SortableTable, SortableTh } from "/components/SortableTable";
 import { PublishDocumentsDialog } from "./dialogs/PublishDocumentsDialog.tsx";
 import { SignatureDocumentsDialog } from "./dialogs/SignatureDocumentsDialog.tsx";
@@ -56,7 +55,6 @@ import {
   BulkExportDialog,
   type BulkExportDialogRef,
 } from "/components/documents/BulkExportDialog";
-import type { DocumentsPageUserEmailQuery } from "./__generated__/DocumentsPageUserEmailQuery.graphql";
 import { PermissionsContext } from "/providers/PermissionsContext";
 
 const documentsFragment = graphql`
@@ -94,15 +92,15 @@ type Props = {
   queryRef: PreloadedQuery<DocumentGraphListQuery>;
 };
 
-const UserEmailQuery = graphql`
-  query DocumentsPageUserEmailQuery {
-    viewer {
-      user {
-        email
-      }
-    }
-  }
-`;
+// const UserEmailQuery = graphql`
+//   query DocumentsPageUserEmailQuery {
+//     viewer {
+//       user {
+//         email
+//       }
+//     }
+//   }
+// `;
 
 export default function DocumentsPage(props: Props) {
   const { __ } = useTranslate();
@@ -110,17 +108,17 @@ export default function DocumentsPage(props: Props) {
 
   const organization = usePreloadedQuery(
     documentsQuery,
-    props.queryRef
+    props.queryRef,
   ).organization;
 
-  const userEmailData = useLazyLoadQuery<DocumentsPageUserEmailQuery>(
-    UserEmailQuery,
-    {}
-  );
-  const defaultEmail = userEmailData.viewer.user.email;
+  // const userEmailData = useLazyLoadQuery<DocumentsPageUserEmailQuery>(
+  //   UserEmailQuery,
+  //   {}
+  // );
+  // const defaultEmail = userEmailData.viewer.user.email;
   const pagination = usePaginationFragment(
     documentsFragment,
-    organization as DocumentsPageListFragment$key
+    organization as DocumentsPageListFragment$key,
   );
 
   const documents = pagination.data.documents.edges
@@ -137,7 +135,8 @@ export default function DocumentsPage(props: Props) {
 
   usePageTitle(__("Documents"));
 
-  const hasAnyAction = isAuthorized("Document", "updateDocument") ||
+  const hasAnyAction =
+    isAuthorized("Document", "updateDocument") ||
     isAuthorized("Document", "deleteDocument");
 
   const handleSendSigningNotifications = () => {
@@ -162,12 +161,12 @@ export default function DocumentsPage(props: Props) {
       {
         message: sprintf(
           __(
-            "This will permanently delete %s document%s. This action cannot be undone."
+            "This will permanently delete %s document%s. This action cannot be undone.",
           ),
           documentCount,
-          documentCount > 1 ? "s" : ""
+          documentCount > 1 ? "s" : "",
         ),
-      }
+      },
     );
   };
 
@@ -210,7 +209,9 @@ export default function DocumentsPage(props: Props) {
           {isAuthorized("Organization", "createDocument") && (
             <CreateDocumentDialog
               connection={connectionId}
-              trigger={<Button icon={IconPlusLarge}>{__("New document")}</Button>}
+              trigger={
+                <Button icon={IconPlusLarge}>{__("New document")}</Button>
+              }
             />
           )}
         </div>
@@ -289,7 +290,7 @@ export default function DocumentsPage(props: Props) {
                         ref={bulkExportDialogRef}
                         onExport={handleBulkExport}
                         isLoading={isBulkExporting}
-                        defaultEmail={defaultEmail}
+                        // defaultEmail={defaultEmail}
                         selectedCount={selection.length}
                       >
                         <Button
@@ -395,7 +396,7 @@ function DocumentRow({
   const { isAuthorized } = use(PermissionsContext);
   const document = useFragment<DocumentsPageRowFragment$key>(
     rowFragment,
-    documentKey
+    documentKey,
   );
   const lastVersion = document.versions.edges?.[0]?.node;
 
@@ -413,7 +414,7 @@ function DocumentRow({
     lastVersion.signatures?.edges?.map((edge) => edge?.node)?.filter(Boolean) ??
     [];
   const signedCount = signatures.filter(
-    (signature) => signature.state === "SIGNED"
+    (signature) => signature.state === "SIGNED",
   ).length;
 
   const handleDelete = () => {
@@ -427,11 +428,11 @@ function DocumentRow({
       {
         message: sprintf(
           __(
-            'This will permanently delete the document "%s". This action cannot be undone.'
+            'This will permanently delete the document "%s". This action cannot be undone.',
           ),
-          document.title
+          document.title,
         ),
-      }
+      },
     );
   };
 
