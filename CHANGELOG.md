@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## [0.112.2] - 2025-12-31
+
+### Fixed
+
+- Fix people deletion
+
+## [0.112.1] - 2025-12-31
+
+### Changed
+
+- Change minutes max length
+
 ## [0.112.0] - 2025-12-22
 
 ### Added
