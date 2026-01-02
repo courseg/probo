@@ -1,24 +1,35 @@
-FROM ubuntu:24.04
+# --- Stage 1: Build the App ---
+FROM golang:1.23-alpine AS builder
 
-LABEL org.opencontainers.image.source="https://github.com/getprobo/probo"
-LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.vendor="Probo Inc"
+# Install build dependencies (Node.js for frontend, Make/Git for backend)
+RUN apk add --no-cache nodejs npm make git bash
 
-RUN useradd -m probo && \
-    apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y ca-certificates libcap2-bin && \
-    rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
-COPY probod /usr/local/bin/probod
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+# Copy all source code
+COPY . .
 
-RUN chmod +x /usr/local/bin/probod && \
-    chmod +x /usr/local/bin/entrypoint.sh && \
-    setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/probod && \
-    mkdir -p /etc/probod && \
-    chown probo:probo /etc/probod
+# Build the Frontend and Backend
+# This runs the standard build commands from the repo's Makefile
+RUN make build
 
-USER probo
+# --- Stage 2: Runtime Environment ---
+FROM alpine:latest
 
+# Install runtime dependencies (Root CA certs for HTTPS, bash for scripts)
+RUN apk add --no-cache ca-certificates bash
+
+WORKDIR /app
+
+# Copy the built binary and config templates from the builder stage
+COPY --from=builder /app/bin/probod /usr/local/bin/probod
+COPY --from=builder /app/cfg /app/cfg
+# Copy entrypoint if it exists
+COPY --from=builder /app/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+# Ensure everything is executable
+RUN chmod +x /usr/local/bin/probod /usr/local/bin/entrypoint.sh
+
+# Set the entrypoint
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["/usr/local/bin/probod"]
