@@ -1,7 +1,8 @@
 # --- Stage 1: Build the App ---
-FROM golang:1.23-alpine AS builder
+# UPDATED: Use 'alpine' tag to get the latest Go version (supports 'tool' directive)
+FROM golang:alpine AS builder
 
-# Install system build dependencies
+# Install build dependencies (Node.js for frontend, Make/Git for backend)
 RUN apk add --no-cache nodejs npm make git bash
 
 WORKDIR /app
@@ -12,7 +13,7 @@ COPY . .
 # 1. Install Go Dependencies
 RUN go mod download
 
-# 2. Install Node.js Dependencies (Fixes "tsx not found")
+# 2. Install Node.js Dependencies
 RUN npm ci
 
 # 3. Build the Application
