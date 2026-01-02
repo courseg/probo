@@ -1,8 +1,7 @@
 # --- Stage 1: Build the App ---
-# UPDATED: Use 'alpine' tag to get the latest Go version (supports 'tool' directive)
 FROM golang:alpine AS builder
 
-# Install build dependencies (Node.js for frontend, Make/Git for backend)
+# Install build dependencies
 RUN apk add --no-cache nodejs npm make git bash
 
 WORKDIR /app
@@ -22,8 +21,8 @@ RUN make build
 # --- Stage 2: Runtime Environment ---
 FROM alpine:latest
 
-# Install runtime dependencies
-RUN apk add --no-cache ca-certificates bash nodejs
+# UPDATED: Added 'openssl' to this list so the entrypoint can generate keys
+RUN apk add --no-cache ca-certificates bash nodejs openssl
 
 WORKDIR /app
 
